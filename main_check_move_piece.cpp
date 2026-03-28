@@ -10,36 +10,61 @@ static void onMouse( int event, int x, int y, int flags, void* param);
 void presentMoves(cv::Mat src, ChessImageProcessing* chessController, std::vector<cv::Point> moves);
 int main( int argc, char** argv )
 {
-    if (argc <3)
+    if (argc <2)
     {
-        std::cout << "Need 2 pictures and 1 threshold" << std::endl;
+        std::cout << "Need threshold" << std::endl;
         return -1;
     }
-    int threshold = atoi(argv[3]);
-    cv::Mat src1 = imread( cv::samples::findFile( argv[1] ), cv::IMREAD_COLOR ); // Load an image
+    cv::Mat src1,src2;
+    int threshold = atoi(argv[1]);
+    ChessImageProcessing chessController;
+    std::vector<cv::Rect> moves;
 
+    if (argc <4) {
+        cv::VideoCapture cap(0);
+        cv::Mat dumpImage;
+        cap.read(dumpImage);
+        printf("dumpImage[%d,%d]\r\n",dumpImage.rows,dumpImage.cols);
+        cv::imshow("Contours",dumpImage);
+        int keyPressed = 0;
+        do {
+            keyPressed = cv::waitKey(30);
+            switch (keyPressed){
+                case '1':
+                {
+                    printf("Capture 1\r\n");
+                    cap.read(src1);
+                    cv::imshow("src1",src1);
+                }
+                break;
+                case '2':
+                {
+                    printf("Capture 2\r\n");
+                    cap.read(src2);
+                    cv::imshow("src2",src2);
+                }
+                break;
+            }
+            cap.read(dumpImage);
+            cv::imshow("Contours",dumpImage);
+        } while(keyPressed != ' ');
+
+    } else {
+        src1 = imread( cv::samples::findFile( argv[2] ), cv::IMREAD_COLOR ); // Load an image
+        src2 = imread( cv::samples::findFile( argv[3] ), cv::IMREAD_COLOR ); // Load an image
+    }
     if (src1.empty())
     {
         std::cout << "Cannot read the image: " << argv[2] << std::endl;
         return -1;
     }
 
-    cv::Mat src2 = imread( cv::samples::findFile( argv[2] ), cv::IMREAD_COLOR ); // Load an image
-
     if (src2.empty())
     {
         std::cout << "Cannot read the image: " << argv[2] << std::endl;
         return -1;
     }
-    ChessImageProcessing chessController;
-    std::vector<cv::Rect> moves;
-    chessController.extractMove(src1, src2, threshold, moves);
     cv::Mat drawImage = src2.clone();
-    for( size_t i = 0; i < moves.size(); i++ )
-    {
-        //        printf("rect[%d](%d,%d)\r\n",i,moves[i].width,moves[i].height);
-        rectangle( drawImage, moves[i].tl(), moves[i].br(), cv::Scalar(0,0,255), 2 );
-    }
     cv::imshow("Contours",drawImage);
     cv::setMouseCallback( "Contours", onMouse, &chessController );
     char keyPressed = 0;
@@ -56,6 +81,13 @@ int main( int argc, char** argv )
         case 'p':
         {
             std::cout << "Perspective" << std::endl;
+            chessController.calculateWarpMatrix();
+            chessController.extractMove(src1, src2, threshold, moves);
+            for( size_t i = 0; i < moves.size(); i++ )
+            {
+                //        printf("rect[%d](%d,%d)\r\n",i,moves[i].width,moves[i].height);
+                rectangle( drawImage, moves[i].tl(), moves[i].br(), cv::Scalar(0,0,255), 2 );
+            }
             std::vector<cv::Point> chessMoves;
             chessController.convertChessMove(moves, chessMoves);
             presentMoves(src2,&chessController,chessMoves);
@@ -101,9 +133,10 @@ void presentMoves(cv::Mat src, ChessImageProcessing* chessController, std::vecto
     }
 
     for(int i = 0; i< moves.size(); i++) {
+        printf("Move(%d,%d)\r\n",moves[i].x,moves[i].y);
         cv::rectangle(chessBoard,
-                      cv::Rect(moves[i].x*chessBoardBox,
-                               moves[i].y*chessBoardBox,
+                      cv::Rect(moves[i].y*chessBoardBox,
+                               moves[i].x*chessBoardBox,
                                chessBoardBox,
                                chessBoardBox),
                       cv::Scalar(0,0,255),3);

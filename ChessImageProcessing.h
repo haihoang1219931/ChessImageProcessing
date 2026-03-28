@@ -24,6 +24,7 @@ public:
     cv::Mat getNewImageSide();
     bool detectSide(cv::Mat image);
     bool isBlackSide();
+    void calculateWarpMatrix();
     void extractMove(const cv::Mat prevColor, const cv::Mat nextColor, int threshold, std::vector<cv::Rect>& moves);
     void convertChessMove(const std::vector<cv::Rect> moves, std::vector<cv::Point>& chessMoves);
     std::vector<cv::Point>& corners();

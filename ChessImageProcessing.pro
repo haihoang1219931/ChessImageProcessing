@@ -20,7 +20,9 @@ unix:!macx: LIBS += -L/usr/local/lib/  \
 SOURCES += \
         main.cpp \
     main_check_move_piece.cpp \
-    ChessImageProcessing.cpp
+    ChessImageProcessing.cpp \
+    main_color_object.cpp \
+    main_google_detect.cpp
 
 HEADERS += \
     ChessImageProcessing.h
