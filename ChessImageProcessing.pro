@@ -22,7 +22,9 @@ SOURCES += \
     main_check_move_piece.cpp \
     ChessImageProcessing.cpp \
     main_color_object.cpp \
-    main_google_detect.cpp
+    main_google_detect.cpp \
+    main_pattern_matching.cpp \
+    main_visual_hsv.cpp
 
 HEADERS += \
     ChessImageProcessing.h

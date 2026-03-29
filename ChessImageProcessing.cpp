@@ -74,7 +74,7 @@ void ChessImageProcessing::extractMove(const cv::Mat prevColor, const cv::Mat ne
     for( size_t i = 0; i < contours.size(); i++ )
     {
         approxPolyDP( contours[i], contours_poly[i], 5, true );
-//        printf("found rect\r\n");
+        printf("found rect(x,y,)\r\n");
         boundRect[i] = boundingRect( contours_poly[i] );
         if(boundRect[i].width > 20 && boundRect[i].height > 20)
         {
@@ -96,19 +96,19 @@ void ChessImageProcessing::extractMove(const cv::Mat prevColor, const cv::Mat ne
 void ChessImageProcessing::convertChessMove(const std::vector<cv::Rect> moves, std::vector<cv::Point>& chessMoves) {
     if(m_corners.size() != 4) {
         return;
-    }    
-    std::vector<cv::Rect> warpedMoves;
+    }
     for( size_t i = 0; i < moves.size(); i++ ){
-        std::vector<cv::Point2f> obj_corners,scene_corners;
-        obj_corners.push_back(cv::Point2f(moves[i].tl().x,moves[i].tl().y));
-        obj_corners.push_back(cv::Point2f(moves[i].tl().x,moves[i].br().y));
-        obj_corners.push_back(cv::Point2f(moves[i].br().x,moves[i].br().y));
-        obj_corners.push_back(cv::Point2f(moves[i].br().x,moves[i].tl().y));
-        cv::perspectiveTransform(obj_corners,scene_corners,m_transformMatrix);
-        warpedMoves.push_back(cv::Rect(scene_corners[0],scene_corners[2]));
-        int rowTop = (warpedMoves[i].y)/m_chessBoardBox;
-        int rowBottom = (warpedMoves[i].y + warpedMoves[i].height)/m_chessBoardBox;
-        int col = (warpedMoves[i].x + warpedMoves[i].height/2)/m_chessBoardBox;
+        int rowTop = (moves[i].y)/m_chessBoardBox;
+        int rowBottom = (moves[i].y + moves[i].height)/m_chessBoardBox;
+        int col = (moves[i].x + moves[i].width/2)/m_chessBoardBox;
+        printf("moves x[%d] y[%d] w[%d] h[%d] "
+               "rowTop[%d][%d] "
+               "rowBottom[%d][%d] "
+               "col[%d][%d]\r\n",
+               moves[i].x,moves[i].y,moves[i].width,moves[i].height,
+               moves[i].y,rowTop,
+               moves[i].y + moves[i].height,rowBottom,
+               moves[i].x + moves[i].width/2,col);
         if(rowTop >=0 && rowTop <m_chessBoardRow &&
                 col >=0 && col <m_chessBoardRow ) {
             chessMoves.push_back(cv::Point(rowTop,col));
